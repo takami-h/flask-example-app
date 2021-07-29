@@ -11,6 +11,7 @@ def create_app(test_config=None):
         SECRET_KEY="dev",
         # store the database in the instance folder
         DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
+        APP_VERSION=os.environ.get('APP_VERSION', '0.0.0'),
     )
 
     if test_config is None:
