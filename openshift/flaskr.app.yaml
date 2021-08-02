@@ -1,0 +1,119 @@
+# oc new-app https://github.com/takami-h/flask-example-app.git --name flaskr --output yaml
+
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: flaskr
+      app.kubernetes.io/component: flaskr
+      app.kubernetes.io/instance: flaskr
+    name: flaskr
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: flaskr
+      app.kubernetes.io/component: flaskr
+      app.kubernetes.io/instance: flaskr
+    name: flaskr
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: flaskr:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/takami-h/flask-example-app.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: python:3.8-ubi8
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: lPJ5f5vODK6G8kIn5exY
+      type: GitHub
+    - generic:
+        secret: H6rA3OEqyD8YUfJ2mtz-
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"flaskr:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"flaskr\")].image"}]'
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: flaskr
+      app.kubernetes.io/component: flaskr
+      app.kubernetes.io/instance: flaskr
+    name: flaskr
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: flaskr
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deployment: flaskr
+      spec:
+        containers:
+        - image: ' '
+          name: flaskr
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: flaskr
+      app.kubernetes.io/component: flaskr
+      app.kubernetes.io/instance: flaskr
+    name: flaskr
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deployment: flaskr
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}

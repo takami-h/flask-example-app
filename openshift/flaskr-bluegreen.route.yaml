@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskr1
+    app.kubernetes.io/component: flaskr1
+    app.kubernetes.io/instance: flaskr1
+  name: flaskr-bluegreen
+spec:
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: flaskr1
+  # to:
+  #   kind: Service
+  #   name: flaskr2
+status: {}

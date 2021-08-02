@@ -1,0 +1,62 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"flaskr:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"flaskr2\")].image"}]'
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: flaskr2
+      app.kubernetes.io/component: flaskr2
+      app.kubernetes.io/instance: flaskr2
+    name: flaskr2
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: flaskr2
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deployment: flaskr2
+      spec:
+        containers:
+        - env:
+          - name: APP_VERSION
+            value: 2.0.0
+          image: ' '
+          name: flaskr2
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: flaskr2
+      app.kubernetes.io/component: flaskr2
+      app.kubernetes.io/instance: flaskr2
+    name: flaskr2
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deployment: flaskr2
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}
