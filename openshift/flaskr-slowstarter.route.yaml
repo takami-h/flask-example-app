@@ -1,0 +1,22 @@
+# oc create route edge --insecure-policy=Redirect --service=flaskr --dry-run=client --output yaml
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskr-slowstarter
+    app.kubernetes.io/component: flaskr-slowstarter
+    app.kubernetes.io/instance: flaskr-slowstarter
+  name: flaskr-slowstarter
+spec:
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: ""
+    name: flaskr-slowstarter
+    weight: null
+status: {}

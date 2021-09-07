@@ -1,69 +1,10 @@
-
 apiVersion: v1
 items:
-- apiVersion: image.openshift.io/v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
-    labels:
-      app: flaskr-slowstarter
-      app.kubernetes.io/component: flaskr-slowstarter
-      app.kubernetes.io/instance: flaskr-slowstarter
-    name: flaskr-slowstarter
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-- apiVersion: build.openshift.io/v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
-    labels:
-      app: flaskr-slowstarter
-      app.kubernetes.io/component: flaskr-slowstarter
-      app.kubernetes.io/instance: flaskr-slowstarter
-    name: flaskr-slowstarter
-  spec:
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: flaskr-slowstarter:latest
-    postCommit: {}
-    resources: {}
-    source:
-      git:
-        uri: https://github.com/takami-h/flask-example-app.git
-      type: Git
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: python:3.8-ubi8
-          namespace: openshift
-      type: Source
-    triggers:
-    - github:
-        secret: lPJ5f5vODK6G8kIn5exY
-      type: GitHub
-    - generic:
-        secret: H6rA3OEqyD8YUfJ2mtz-
-      type: Generic
-    - type: ConfigChange
-    - imageChange: {}
-      type: ImageChange
-  status:
-    lastVersion: 0
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
     annotations:
-      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"flaskr-slowstarter:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"flaskr-slowstarter\")].image"}]'
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"flaskr:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"flaskr-slowstarter\")].image"}]'
       openshift.io/generated-by: OpenShiftNewApp
     creationTimestamp: null
     labels:
@@ -88,31 +29,31 @@ items:
         containers:
         - env:
           - name: INITIAL_DELAY
-            value: 60
-        - image: ' '
+            value: "60"
+          image: ' '
           name: flaskr-slowstarter
           ports:
           - containerPort: 8080
             protocol: TCP
+          # startupProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 8080
+          #   failureThreshold: 10
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 8080
+          #   failureThreshold: 3
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 8080
+          #   failureThreshold: 3
+          #   periodSeconds: 10
           resources: {}
-        startupProbe:
-          httpGet:
-            path: /
-            port: 8080
-          failureThreshold: 10
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          failureThreshold: 3
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          failureThreshold: 3
-          periodSeconds: 10
   status: {}
 - apiVersion: v1
   kind: Service
