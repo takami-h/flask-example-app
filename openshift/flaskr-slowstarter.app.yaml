@@ -95,6 +95,24 @@ items:
           - containerPort: 8080
             protocol: TCP
           resources: {}
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          failureThreshold: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          failureThreshold: 3
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          failureThreshold: 3
+          periodSeconds: 10
   status: {}
 - apiVersion: v1
   kind: Service
