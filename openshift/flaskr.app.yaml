@@ -92,7 +92,11 @@ items:
           ports:
           - containerPort: 8080
             protocol: TCP
-          resources: {}
+          resources:
+            limits:
+              cpu: 50m
+            requests:
+              cpu: 50m
   status: {}
 - apiVersion: v1
   kind: Service
