@@ -2,6 +2,8 @@ import os
 
 from flask import Flask
 
+from jaeger_client import Config
+from flask_opentracing import FlaskTracing
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
@@ -13,6 +15,11 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
         APP_VERSION=os.environ.get('APP_VERSION', '0.0.0'),
     )
+
+    config = Config(config={'sampler': {'type': 'const', 'param': 1}},
+                    service_name='flaskr-traced')
+    opentracing_tracer = config.initialize_tracer()
+    tracing = FlaskTracing(opentracing_tracer, True, app)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

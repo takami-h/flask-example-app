@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flaskr-traced
+    app.kubernetes.io/component: flaskr-traced
+    app.kubernetes.io/instance: flaskr-traced
+  name: flaskr-traced
+spec:
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: ""
+    name: flaskr-traced
+    weight: null
+status: {}
