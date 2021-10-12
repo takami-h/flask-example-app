@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flaskr-pipeline-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: flaskr
+spec:
+  description: Flaskr blog app.
+  params:
+    - name: git-url
+      description: Git repository URL
+      default: https://github.com/takami-h/flask-example-app.git
+    - name: image-name
+      description: App image name
+      default: image-registry.openshift-image-registry.svc:5000/flaskr-dev/flaskr
+  workspaces:
+    - name: source
+  tasks:
+    - name: checkout
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: main
+        - name: deleteExisting
+          value: 'true'
+      workspaces:
+        - name: output
+          workspace: source
+    - name: test
+      runAfter:
+        - checkout
+      taskRef:
+        kind: Task
+        name: pytest
+      params:
+        - name: PYTHON
+          value: "3.6"
+      workspaces:
+        - name: source
+          workspace: source
+    - name: build-image
+      runAfter:
+        - test
+      taskRef:
+        kind: ClusterTask
+        name: s2i-python-3
+      params:
+        - name: MINOR_VERSION
+          value: '6'
+        - name: IMAGE
+          value: $(params.image-name)
+        - name: TLSVERIFY
+          value: 'false'
+      workspaces:
+        - name: source
+          workspace: source
