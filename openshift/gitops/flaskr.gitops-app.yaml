@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: flaskr-config
+  name: flaskr-config-999
   namespace: openshift-gitops
 spec:
   destination:

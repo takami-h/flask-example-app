@@ -42,21 +42,22 @@ spec:
       workspaces:
         - name: output
           workspace: source
-    - name: test
-      runAfter:
-        - checkout
-      taskRef:
-        kind: Task
-        name: pytest
-      params:
-        - name: PYTHON
-          value: "3.6"
-      workspaces:
-        - name: source
-          workspace: source
+    # - name: test
+    #   runAfter:
+    #     - checkout
+    #   taskRef:
+    #     kind: Task
+    #     name: pytest
+    #   params:
+    #     - name: PYTHON
+    #       value: "3.6"
+    #   workspaces:
+    #     - name: source
+    #       workspace: source
     - name: build-image
       runAfter:
-        - test
+        - checkout
+    #    - test
       taskRef:
         kind: ClusterTask
         name: s2i-python
