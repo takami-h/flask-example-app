@@ -24,7 +24,7 @@ spec:
       default: https://github.com/takami-h/flask-example-app.git
     - name: image-name
       description: App image name
-      default: image-registry.openshift-image-registry.svc:5000/flaskr-dev/flaskr
+      default: flaskr:latest
   workspaces:
     - name: source
   tasks:
@@ -59,12 +59,12 @@ spec:
         - test
       taskRef:
         kind: ClusterTask
-        name: s2i-python-3
+        name: s2i-python
       params:
-        - name: MINOR_VERSION
-          value: '6'
+        - name: VERSION
+          value: '3.6-ubi8'
         - name: IMAGE
-          value: $(params.image-name)
+          value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.image-name)
         - name: TLSVERIFY
           value: 'false'
       workspaces:
