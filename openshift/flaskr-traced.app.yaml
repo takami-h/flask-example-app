@@ -4,7 +4,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"flaskr:latest","namespace":"flaskr"},"fieldPath":"spec.template.spec.containers[?(@.name==\"flaskr-traced\")].image"}]'
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"flaskr:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"flaskr-traced\")].image"}]'
       openshift.io/generated-by: OpenShiftNewApp
       sidecar.jaegertracing.io/inject: "true"
     creationTimestamp: null

@@ -9,11 +9,11 @@ spec:
     type: "elasticsearch"  
     retentionPolicy: 
       application:
-        maxAge: 1d
+        maxAge: 8h
       infra:
-        maxAge: 7d
+        maxAge: 8h
       audit:
-        maxAge: 7d
+        maxAge: 8h
     elasticsearch:
       nodeCount: 3 
       storage:
@@ -21,7 +21,7 @@ spec:
         size: 2G
       resources: 
         requests:
-          memory: "1Gi"
+          memory: "2Gi"
       proxy: 
         resources:
           limits:
