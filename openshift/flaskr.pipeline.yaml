@@ -10,6 +10,88 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: python-coverage
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/categories: Code Quality
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: python, coverage
+    tekton.dev/displayName: python coverage
+    tekton.dev/platforms: "linux/amd64,linux/s390x,linux/ppc64le"
+spec:
+  description: >-
+    This task can be used to measure code coverage of Python projects.
+
+  workspaces:
+    - name: source
+  params:
+    - name: PYTHON
+      description: The used Python version, more precisely the tag for the Python image
+      type: string
+      default: "latest"
+    - name: ARGS
+      description: The additional arguments to be used with pytest
+      type: string
+      default: ""
+    - name: SOURCE_PATH
+      description: The path to the source code
+      default: "."
+    - name: REQUIREMENTS_FILE
+      description: The name of the requirements file inside the source location
+      default: "requirements.txt"
+  steps:
+    - name: code-coverage
+      image: docker.io/python:$(inputs.params.PYTHON)
+      workingDir: $(workspaces.source.path)
+      script: |
+        export PATH=$PATH:$HOME/.local/bin
+        if [ -n "$(inputs.params.REQUIREMENTS_FILE)" ] && [ -e "$(inputs.params.REQUIREMENTS_FILE)" ];then
+          pip install -r $(inputs.params.SOURCE_PATH)/$(inputs.params.REQUIREMENTS_FILE)
+          pip show pytest || {
+            echo "###\nWarning: Pytest is missing in your requirements\n###";
+            pip install pytest
+          }
+          pip show coverage || {
+            echo "###\nWarning: Coverage is missing in your requirements\n###";
+            pip install coverage
+          }
+        else
+          pip install pytest coverage
+        fi
+        coverage run -m pytest $(inputs.params.ARGS) $(inputs.params.SOURCE_PATH)
+        coverage report -m
+        coverage xml
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sonar-settings
+data:
+  sonar-project.properties: |
+    #Configure here general information about the environment, such as SonarQube server connection details for example
+    #No information about specific project should appear here
+
+    #----- Default SonarQube server
+    #sonar.host.url=http://localhost:9000
+    sonar.host.url=http://the-sonarqube-sonarqube.sonarqube.svc.cluster.local:9000
+
+    #----- Default source code encoding
+    #sonar.sourceEncoding=UTF-8
+
+    # ↓↓↓ ここを編集してください ↓↓↓
+    sonar.login=REPLACE-TOKEN-GENERATED-BY-SONARQUBE
+    sonar.projectKey=flask-example-app-999
+    # ↑↑↑ ここを編集してください ↑↑↑
+
+    sonar.sources=flaskr
+    sonar.tests=tests
+    sonar.python.coverage.reportPaths=coverage.xml
 
 ---
 apiVersion: tekton.dev/v1beta1
@@ -27,6 +109,7 @@ spec:
       default: flaskr:latest
   workspaces:
     - name: source
+    - name: sonar-settings
   tasks:
     - name: checkout
       taskRef:
@@ -54,10 +137,34 @@ spec:
     #   workspaces:
     #     - name: source
     #       workspace: source
-    - name: build-image
+    - name: test-with-coverage
       runAfter:
         - checkout
+      taskRef:
+        kind: Task
+        name: python-coverage
+      params:
+        - name: PYTHON
+          value: "3.6"
+      workspaces:
+        - name: source
+          workspace: source
+    - name: analyze-code
+      runAfter:
+        - test-with-coverage
+      taskRef:
+        kind: Task
+        name: sonarqube-scanner
+      workspaces:
+        - name: source-dir
+          workspace: source
+        - name: sonar-settings
+          workspace: sonar-settings
+    - name: build-image
+      runAfter:
+    #    - checkout
     #    - test
+        - analyze-code
       taskRef:
         kind: ClusterTask
         name: s2i-python
