@@ -3,7 +3,7 @@ import pages
 import time
 
 def before_feature(context, feature):
-    context.browser = webdriver.Safari()
+    context.browser = webdriver.Chrome()
     context.registration_page = pages.RegistrationPage(context.browser)
     context.login_page = pages.LoginPage(context.browser)
     context.posts_page = pages.PostsPage(context.browser)
